@@ -9,8 +9,7 @@
   <link rel="stylesheet" type="text/css" href="https://unpkg.com/vue-multiselect@2.0.0-beta.14/dist/vue-multiselect.min.css">
 </head>
 <body onload=init()>
-
-  <div id="app">
+<div id="app">
     <multiselect
     v-model="muni_list"
     :options="options"
@@ -18,26 +17,20 @@
     placeholder="Välj kommun"
     >
   </multiselect>
-  <!--<pre>{{ muni_list }}</pre>-->
-
-  <button type="button" name="button" onclick='drawChart()'>Rita graf</button>
-
+  <pre>{{ muni_list }}</pre>
+  <button type="button" name="button" onclick='drawChart("log")'>Rita graf</button>
   <p>Om du vill komma tillbaka till det här urvalet kan du kopiera adressen i det här fältet:</p>
   <input id="url" v-model="url" style="width: 600px">
-
 </div>
-<div id="plot" style="width: 600px; height: 600px;">
-
-</div>
+<div id="plot" style="width: 600px; height: 600px;"></div>
 
 <script type="text/javascript">
+
 var housePrices = [];
 var request = new XMLHttpRequest();
 request.open("GET", "price_change.json", false);
 request.send(null)
 var housePrices = JSON.parse(request.responseText);
-
-
 //Test-data 3*3-matris
 var housePrices2 =
 {
@@ -59,10 +52,11 @@ var housePrices2 =
 };
 //var muni_list=[];
 //var url_args=[];
+
 function init() {
   //readFile();
   multi.muni_list = getSelectionFromUrl();
-  drawChart();
+  drawChart('log');
 }
 
 function getSelectionFromUrl() {
@@ -72,7 +66,6 @@ function getSelectionFromUrl() {
   //muni_list=[muni_list];
   return url_args;
 }
-
 
 var multi=new Vue({
   components: {
@@ -86,70 +79,51 @@ var multi=new Vue({
   computed: {
     url: function (){
       var address = window.location.href.split('?')[0];
-      console.log(address, "234");
       var munis = this.muni_list;
       var muni_url = encodeURI(munis);
       var new_address = address + '?' + muni_url;
       return new_address;
     },
-    url_length: function () {
-      return this.url.length;
-    }
   }
 }).$mount('#app')
 
-function drawChart() {
+function drawChart(type) {
   //console.log(multi.muni_list);
   var data = [];
   for (var i = 0; i < multi.muni_list.length; i++) {
-
+    //Om kommunlistan är tom, gör inget.
     if (multi.muni_list[i]) {
-      //console.log("Hej",multi.muni_list[i]);
       trace=getData(multi.muni_list[i]);
       data.push(trace);
-    }
+
     var layout = {
-      title: 'Bopriser, småhus',
+      title: 'Bopriser, småhus. Förändring',
       xaxis: {
         title: 'År'
       },
       yaxis: {
-        title: 'Pris i tusental SEK',
-        type: 'log'
+        title: 'Ackumulerad förändring',
+        type: type
       }};
       Plotly.newPlot('plot', data, layout);
+      }
     }
-
 }
-
   function getData(muni) {
-    //console.log("Vafan", housePrices);
-
+    //Ger en kommuns data, som blir en trace som skickas till Plotly
     var years = Object.keys(housePrices[muni]);
-
     var plotData = {};
     plotData.x = years;
-
     var prices = [];
-
     years.forEach(setY);
-
     function setY(item, index) {
       prices.push(housePrices[muni][item]);
     }
     plotData.y = prices;
     plotData.type = "scatter";
     plotData.name = muni;
-
-    //plotData = [plotData];
-
-    console.log(plotData);
     return(plotData);
   }
-
-
-
   </script>
-
 </body>
 </html>
