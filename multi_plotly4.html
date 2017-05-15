@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Multiselect</title>
+  <script src="vue.js"></script>
+  <script src="plotly-latest.min.js"></script>
+  <script src="vue-multiselect.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/vue-multiselect@2.0.0-beta.14/dist/vue-multiselect.min.css">
+</head>
+<body onload=init()>
+
+  <div id="app">
+    <multiselect
+    v-model="muni_list"
+    :options="options"
+    :multiple="true"
+    placeholder="Välj kommun"
+    >
+  </multiselect>
+  <!--<pre>{{ muni_list }}</pre>-->
+
+  <button type="button" name="button" onclick='drawChart()'>Rita graf</button>
+
+  <p>Om du vill komma tillbaka till det här urvalet kan du kopiera adressen i det här fältet:</p>
+  <input id="url" v-model="url" style="width: 600px">
+
+</div>
+<div id="plot" style="width: 600px; height: 600px;">
+
+</div>
+
+<script type="text/javascript">
+var housePrices = [];
+var request = new XMLHttpRequest();
+request.open("GET", "bopriser.json", false);
+request.send(null)
+var housePrices = JSON.parse(request.responseText);
+
+
+var housePrices2 =
+{
+  "0764 Alvesta": {
+    "1981": 252,
+    "1998": 473,
+    "2015": 1158
+  },
+  "0765 Älmhult": {
+    "1981": 257,
+    "1998": 555,
+    "2015": 1518
+  },
+  "0780 Växjö": {
+    "1981": 372,
+    "1998": 803,
+    "2015": 2544
+  }
+};
+//var muni_list=[];
+var url_args=[];
+function init() {
+  url_args = window.location.search.substring(1);
+  url_args=decodeURI(url_args);
+  url_args=url_args.split(",")
+  //muni_list=[muni_list]
+  console.log("init", url_args);
+  multi.muni_list = url_args;
+  drawChart();
+}
+
+var multi=new Vue({
+  components: {
+    Multiselect: window.VueMultiselect.default
+  },
+  data: {
+    url_args: '',
+    //value: url_args,
+    muni_list: '',
+    options: Object.keys(housePrices)
+  },
+  computed: {
+    url: function (){
+      var address = window.location.href.split('?')[0];
+      console.log(address, "234");
+      var munis = this.muni_list;
+      var muni_url = encodeURI(munis);
+      var new_address = address + '?' + muni_url;
+      return new_address;
+    },
+    url_length: function () {
+      return this.url.length;
+    }
+
+  }
+
+}).$mount('#app')
+
+
+
+
+
+function drawChart() {
+
+  console.log(multi.muni_list);
+  console.log('Hej');
+  var data = [];
+  for (var i = 0; i < multi.muni_list.length; i++) {
+    trace=getData(multi.muni_list[i]);
+    data.push(trace);
+  }
+  console.log("hej2", data);
+  //var data = [trace1, trace2];
+  var layout = {
+    title: 'Bopriser, småhus',
+    xaxis: {
+      title: 'År'
+    },
+    yaxis: {
+      title: 'Pris i tusental SEK'
+    }};
+    Plotly.newPlot('plot', data, layout);
+
+
+
+  }
+
+  function getData(muni) {
+    var years = Object.keys(housePrices[muni]);
+
+    var plot_data2 = {};
+    plot_data2.x = years;
+
+    var prices = [];
+
+    years.forEach(setY);
+
+    function setY(item, index) {
+      prices.push(housePrices[muni][item]);
+    }
+    plot_data2.y = prices;
+    plot_data2.type = "scatter";
+    plot_data2.name = muni;
+
+    //plot_data2 = [plot_data2];
+
+    console.log(plot_data2);
+    return(plot_data2);
+  }
+
+
+
+  </script>
+
+</body>
+</html>
