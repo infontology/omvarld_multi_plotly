@@ -37,7 +37,7 @@ function readFile() {
   var request = new XMLHttpRequest();
   request.open("GET", "price_change.json", false);
   request.send(null)
-  var housePrices = JSON.parse(request.responseText);
+  housePrices = JSON.parse(request.responseText);
   console.log("readFile", housePrices);
 }
 
@@ -72,6 +72,11 @@ function init() {
   multi.muni_list = url_args;
   drawChart();
 }
+
+function getSelectionFromUrl() {
+  
+}
+
 
 var multi=new Vue({
   components: {
