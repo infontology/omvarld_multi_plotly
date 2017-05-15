@@ -32,14 +32,11 @@
 
 <script type="text/javascript">
 var housePrices = [];
-var years = [];
-function readFile() {
-  var request = new XMLHttpRequest();
-  request.open("GET", "price_change.json", false);
-  request.send(null)
-  housePrices = JSON.parse(request.responseText);
-  console.log("readFile", housePrices);
-}
+var request = new XMLHttpRequest();
+request.open("GET", "price_change.json", false);
+request.send(null)
+var housePrices = JSON.parse(request.responseText);
+
 
 //Test-data 3*3-matris
 var housePrices2 =
@@ -61,20 +58,19 @@ var housePrices2 =
   }
 };
 //var muni_list=[];
-var url_args=[];
+//var url_args=[];
 function init() {
-  readFile();
-  url_args = window.location.search.substring(1);
-  url_args=decodeURI(url_args);
-  url_args=url_args.split(",")
-  //muni_list=[muni_list]
-  console.log("init", url_args);
-  multi.muni_list = url_args;
+  //readFile();
+  multi.muni_list = getSelectionFromUrl();
   drawChart();
 }
 
 function getSelectionFromUrl() {
-  
+  var url_args = window.location.search.substring(1);
+  url_args=decodeURI(url_args);
+  url_args=url_args.split(",")
+  //muni_list=[muni_list];
+  return url_args;
 }
 
 
@@ -84,7 +80,6 @@ var multi=new Vue({
   },
   data: {
     url_args: '',
-    //value: url_args,
     muni_list: '',
     options: Object.keys(housePrices)
   },
@@ -100,44 +95,40 @@ var multi=new Vue({
     url_length: function () {
       return this.url.length;
     }
-
   }
-
 }).$mount('#app')
 
-
-
-
-
 function drawChart() {
-
   //console.log(multi.muni_list);
-  console.log('Hej');
   var data = [];
   for (var i = 0; i < multi.muni_list.length; i++) {
-    trace=getData(multi.muni_list[i]);
-    data.push(trace);
-  }
-  //console.log("hej2", data);
-  //var data = [trace1, trace2];
-  var layout = {
-    title: 'Bopriser, småhus',
-    xaxis: {
-      title: 'År'
-    },
-    yaxis: {
-      title: 'Pris i tusental SEK',
-      type: 'log'
-    }};
-    Plotly.newPlot('plot', data, layout);
-  }
+
+    if (multi.muni_list[i]) {
+      //console.log("Hej",multi.muni_list[i]);
+      trace=getData(multi.muni_list[i]);
+      data.push(trace);
+    }
+    var layout = {
+      title: 'Bopriser, småhus',
+      xaxis: {
+        title: 'År'
+      },
+      yaxis: {
+        title: 'Pris i tusental SEK',
+        type: 'log'
+      }};
+      Plotly.newPlot('plot', data, layout);
+    }
+
+}
 
   function getData(muni) {
-    console.log("Vafan", housePrices);
+    //console.log("Vafan", housePrices);
+
     var years = Object.keys(housePrices[muni]);
 
-    var plot_data2 = {};
-    plot_data2.x = years;
+    var plotData = {};
+    plotData.x = years;
 
     var prices = [];
 
@@ -146,14 +137,14 @@ function drawChart() {
     function setY(item, index) {
       prices.push(housePrices[muni][item]);
     }
-    plot_data2.y = prices;
-    plot_data2.type = "scatter";
-    plot_data2.name = muni;
+    plotData.y = prices;
+    plotData.type = "scatter";
+    plotData.name = muni;
 
-    //plot_data2 = [plot_data2];
+    //plotData = [plotData];
 
-    console.log(plot_data2);
-    return(plot_data2);
+    console.log(plotData);
+    return(plotData);
   }
 
 
