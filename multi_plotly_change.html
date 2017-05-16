@@ -17,10 +17,14 @@
     placeholder="Välj kommun"
     >
   </multiselect>
-  <pre>{{ muni_list }}</pre>
-  <button type="button" name="button" onclick='drawChart("log")'>Rita graf</button>
+  <!--<pre>{{ muni_list }}</pre>-->
+  <p>Log-skala på y-axeln:
+  <input type="checkbox" id="log" v-model="logScale">
+  <label for="log">{{logScale}}</label></p>
+  <button type="button" name="button" onclick='drawChart()'>Rita graf</button>
   <p>Om du vill komma tillbaka till det här urvalet kan du kopiera adressen i det här fältet:</p>
   <input id="url" v-model="url" style="width: 600px">
+
 </div>
 <div id="plot" style="width: 600px; height: 600px;"></div>
 
@@ -56,7 +60,7 @@ var housePrices2 =
 function init() {
   //readFile();
   multi.muni_list = getSelectionFromUrl();
-  drawChart('log');
+  drawChart();
 }
 
 function getSelectionFromUrl() {
@@ -74,7 +78,8 @@ var multi=new Vue({
   data: {
     url_args: '',
     muni_list: '',
-    options: Object.keys(housePrices)
+    options: Object.keys(housePrices),
+    logScale: 'true'
   },
   computed: {
     url: function (){
@@ -87,9 +92,14 @@ var multi=new Vue({
   }
 }).$mount('#app')
 
-function drawChart(type) {
+function drawChart() {
   //console.log(multi.muni_list);
   var data = [];
+  if (multi.logScale){
+    type = 'log';
+  } else {
+    type = 'linear';
+  }
   for (var i = 0; i < multi.muni_list.length; i++) {
     //Om kommunlistan är tom, gör inget.
     if (multi.muni_list[i]) {
