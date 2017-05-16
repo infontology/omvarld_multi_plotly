@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Förändring bopriser</title>
+  </head>
+  <body>
+    <div id="json">
+
+    </div>
+    <script type="text/javascript">
+
+
+    var housePrices =
+    {
+      "0764 Alvesta": {
+        "1981": 252,
+        "1998": 473,
+        "2015": 1158
+      },
+      "0765 Älmhult": {
+        "1981": 257,
+        "1998": 555,
+        "2015": 1518
+      },
+      "0780 Växjö": {
+        "1981": 372,
+        "1998": 803,
+        "2015": 2544
+      }
+    };
+    var housePrices2 = [];
+    var request = new XMLHttpRequest();
+    request.open("GET", "bopriser.json", false);
+    request.send(null)
+    var housePrices2 = JSON.parse(request.responseText);
+
+    var housePriceChange = {};
+    transformToChange();
+function transformToChange() {
+  var muni_list = Object.keys(housePrices2);
+  //console.log(housePrices2[muni_list[1]]);
+  for (var i = 0; i < muni_list.length; i++) {
+    console.log(muni_list[i], i);
+    var year_list = Object.keys(housePrices2[muni_list[i]]);
+    console.log(year_list);
+    //Gör strängarna till tal
+    var year_strings = year_list;
+    year_list.forEach(function(x,y,z){ z[y]=x|0 })
+    console.log(year_list);
+    housePriceChange[muni_list[i]]={};
+    console.log("Ändringen", housePriceChange);
+    housePriceChange[muni_list[i]][year_strings[0]]=1;
+    for (var j = 1; j < year_list.length; j++) {
+      var year = year_list[j];
+      var price_t0=housePrices2[muni_list[i]][year_strings[j-1]];
+      var price_t1=housePrices2[muni_list[i]][year_strings[j]];
+      var change=price_t1/price_t0;
+      housePriceChange[muni_list[i]][year_strings[j]]=change*housePriceChange[muni_list[i]][year_strings[j-1]];
+      console.log(year, price_t0, housePriceChange);
+    }
+
+}
+  var json_data = JSON.stringify(housePriceChange);
+  document.getElementById('json').innerHTML = json_data;
+}
+
+
+
+console.log(housePrices2);
+
+    </script>
+  </body>
+</html>
