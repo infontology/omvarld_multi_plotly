@@ -18,10 +18,11 @@
     >
   </multiselect>
   <!--<pre>{{ muni_list }}</pre>-->
-  <p>Log-skala på y-axeln:
+  <p><button type="button" name="button" onclick='drawChart()'>Rita graf</button>
   <input type="checkbox" id="log" v-model="logScale">
-  <label for="log">{{logScale}}</label></p>
-  <button type="button" name="button" onclick='drawChart()'>Rita graf</button>
+  Log-skala på y-axeln</p>
+
+  <!--<label for="log">{{logScale}}</label></p>-->
   <p>Om du vill komma tillbaka till det här urvalet kan du kopiera adressen i det här fältet:</p>
   <input id="url" v-model="url" style="width: 600px">
 
